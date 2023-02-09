@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package com.mycorp.mynamespace;
+
+option java_multiple_files = true;
+
+/* Sample schema to help you get started. */
+
+message SampleRecord {
+  int32 my_field1 = 1;
+  double my_field2 = 2;
+  string my_field3 = 3;
+  ComplexType complexType = 4;
+}
+
+message ComplexType {
+  DummyEnum field1 = 1;
+}
+
+enum DummyEnum {
+  d = 0;
+  e = 1;
+  f = 2;
+  g = 3;
+  h = 4;
+}

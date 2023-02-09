@@ -1,0 +1,69 @@
+spring:
+  cloud:
+    function:
+      definition: first-consumer; second-consumer; protobuf-evolution
+    stream:
+      bindings:
+        first-consumer-in-0:
+          destination: example-topic-2
+          consumer:
+            use-native-encoding: true
+          group: consumer
+        second-consumer-in-0:
+          destination: example-topic-3
+          consumer:
+            use-native-encoding: true
+          group: consumer
+        protobuf-evolution-in-0:
+          destination: protobuf-schema-evolution
+          group: protobuf-schema-evolution-listener
+          consumer:
+            use-native-encoding: false
+      kafka:
+        bindings:
+          first-consumer-in-0:
+            consumer:
+              ackEachRecord: true
+              enableDlq: true
+              dlqName: example-topic-2-dlq
+              autoCommitOnError: true
+              configuration:
+                key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+                value.deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+                schema.registry.url: http://localhost:8081
+                specific.avro.reader: true
+              dlqProducerProperties:
+                configuration:
+                  schema.registry.url: http://localhost:8081
+                  key.serializer: org.apache.kafka.common.serialization.StringSerializer
+                  value.serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+
+          second-consumer-in-0:
+            consumer:
+              ackEachRecord: true
+              enableDlq: true
+              dlqName: example-topic-3-dlq
+              autoCommitOnError: true
+              configuration:
+                key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+                value.deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+                schema.registry.url: http://localhost:8081
+                specific.avro.reader: true
+              dlqProducerProperties:
+                configuration:
+                  schema.registry.url: http://localhost:8081
+                  key.serializer: org.apache.kafka.common.serialization.StringSerializer
+                  value.serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+          protobuf-evolution-in-0.consumer:
+            ackEachRecord: true
+            configuration:
+              # https://kafka.apache.org/documentation/#consumerconfigs
+              # https://docs.confluent.io/platform/current/schema-registry/serdes-develop/serdes-protobuf.html#protobuf-deserializer
+              key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+              value.deserializer: io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer
+              schema.registry.url: http://localhost:8081
+              specific.protobuf.value.type: com.mycorp.mynamespace.SampleRecord  # https://docs.confluent.io/platform/current/schema-registry/serdes-develop/serdes-protobuf.html#protobuf-deserializer
+
+      poller:
+        fixed-delay: 100
+server.port: 8086
